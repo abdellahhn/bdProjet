@@ -1,0 +1,76 @@
+/* Styles for the navigation bar */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to bottom, lightblue 0%, #ffffff 100%); /* Blue sky gradient with lightblue keyword */
+  padding: 10px 20px;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+}
+
+nav li {
+  margin: 0 10px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #333;
+}
+
+nav a:hover {
+  color: #007bff; /* Light blue on hover */
+}
+
+body {
+  background-color: #f7f7f7;
+}
+
+.inscription {
+  margin: 20px auto;
+  width: 500px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.inscription h1 {
+  text-align: center;
+}
+
+.inscription form {
+  margin-top: 20px;
+}
+
+.inscription label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.inscription input {
+  padding: 5px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.inscription button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background-color: #007bff;
+  color: #fff;
+}
+
+.inscription button:hover {
+  background-color: #0057b7;
+}
