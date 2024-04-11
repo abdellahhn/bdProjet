@@ -1,0 +1,103 @@
+/* Styles for the navigation bar */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to bottom, lightblue 0%, #ffffff 100%); /* Blue sky gradient with lightblue keyword */
+  padding: 10px 20px;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+}
+
+nav li {
+  margin: 0 10px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #333;
+}
+
+nav a:hover {
+  color: #007bff; /* Light blue on hover */
+}
+
+/* Styles for the search section */
+.recherche {
+  margin: 20px 0;
+  text-align: center; /* Center the search bar horizontally */
+}
+
+.recherche input {
+  padding: 10px;
+  width: 500px;
+  border: 1px solid #ccc;
+  border-radius: 5px; /* Rounded corners for search bar */
+}
+
+/* Styles for buttons, search bar, and article card on hover */
+nav a:hover,
+.recherche input:hover,
+.article:hover {
+  border-color: #007bff; /* Light blue border on hover */
+}
+
+/* Styles for the section articles */
+.articles {
+  display: flex;
+  flex-wrap: wrap;
+  background: linear-gradient(to bottom, lightblue 0%, #ffffff 100%); /* Blue sky gradient with lightblue keyword */
+}
+
+.article {
+  margin: 10px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  width: 300px;
+  background-color: white;
+}
+
+.article img {
+  width: 100%;
+}
+
+.article h3 {
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+.article p {
+  margin-top: 10px;
+}
+
+.article .prix {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.article a {
+  text-decoration: none;
+  color: #333;
+  margin-top: 10px;
+}
+
+.article a:hover {
+  color: #007bff;
+}
+
+.button-search {
+  padding: 10px;
+  width: 500px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin: 20px 0;
+  text-align: center;
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="stylesheet" href="../style/home.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/" class="logo">Mon logo</a>
+      <ul>
+        <li><a href="/">Accueil</a></li>
+        <li><a href="/panier">Panier</a></li>
+        <li><a href="/commandes">Commandes</a></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/signup">Inscription</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section class="recherche">
+      <input type="text" placeholder="Rechercher un article">
+      <button id="button-search">Chercher</button>
+    </section>
+    <section class="articles">
+      <article class="article">
+        <img src="image-article.jpg" alt="Image de l'article">
+        <h3>Titre de l'article</h3>
+        <p>Description de l'article</p>
+        <span class="prix">10€</span>
+        <a href="/article/1">Voir l'article</a>
+      </article>
+      </section>
+  </main>
+  <script src="../script/home.js"></script>
+</body>
+</html>
