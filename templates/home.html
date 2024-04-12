@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home</title>
-  <link rel="stylesheet" href="../style/home.css">
+  <link rel="stylesheet" href="../static/home.css">
 </head>
 <body>
   <header>
@@ -25,14 +25,16 @@
       <button id="button-search">Chercher</button>
     </section>
     <section class="articles">
+    {% for product in products %}
       <article class="article">
         <img src="image-article.jpg" alt="Image de l'article">
-        <h3>Titre de l'article</h3>
-        <p>Description de l'article</p>
-        <span class="prix">10€</span>
-        <a href="/article/1">Voir l'article</a>
+        <h3>{{ product[5] }}</h3> <!-- Assuming Nom_Article is at index 5 -->
+        <p>{{ product[4] }}</p>    <!-- Assuming Marque is at index 4 -->
+        <span class="prix">{{ product[3] }}€</span> <!-- Assuming prix is at index 3 -->
+        <a href="/article/{{ product[0] }}">Voir l'article</a> <!-- Assuming id_Article is at index 0 -->
       </article>
-      </section>
+    {% endfor %}
+  </section>
   </main>
   <script src="../script/home.js"></script>
 </body>
