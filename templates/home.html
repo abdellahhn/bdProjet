@@ -14,8 +14,11 @@
         <li><a href="/">Accueil</a></li>
         <li><a href="/panier">Panier</a></li>
         <li><a href="/commandes">Commandes</a></li>
-        <li><a href="/login">Login</a></li>
-        <li><a href="/signup">Inscription</a></li>
+        <li id="login-buttons">
+          <li><a href="/login">Connexion</a></li>
+          <li><a href="/signup">Inscription</a></li>
+          <li style="display: none;"><a href="/logout">Déconnexion</a></li>
+        </li>
       </ul>
     </nav>
   </header>
@@ -25,17 +28,39 @@
       <button id="button-search">Chercher</button>
     </section>
     <section class="articles">
-    {% for product in products %}
+      {% for product in products %}
       <article class="article">
         <img src="image-article.jpg" alt="Image de l'article">
-        <h3>{{ product[5] }}</h3> <!-- Assuming Nom_Article is at index 5 -->
-        <p>{{ product[4] }}</p>    <!-- Assuming Marque is at index 4 -->
-        <span class="prix">{{ product[3] }}€</span> <!-- Assuming prix is at index 3 -->
-        <a href="/article/{{ product[0] }}">Voir l'article</a> <!-- Assuming id_Article is at index 0 -->
+        <h3>{{ product[5] }}</h3>
+        <p>{{ product[4] }}</p>
+        <span class="prix">{{ product[3] }}€</span>
+        <a href="/article/{{ product[0] }}">Voir l'article</a>
+        <select name="quantite" id="quantite">
+          {% for qty in range(1, product[1]+1) %}
+            <option value="{{ qty }}">{{ qty }}</option>
+          {% endfor %}
+        </select>
+        <button onclick="addProduitAuPanier()">Ajouter au panier</button>
       </article>
-    {% endfor %}
-  </section>
+      {% endfor %}
+    </section>
   </main>
-  <script src="../script/home.js"></script>
+  <script src="../static/api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginButtons = document.getElementById('login-buttons').querySelectorAll('li');
+
+      if (user.length > 0) {
+        loginButtons[0].style.display = 'none'; // Cacher le bouton Connexion
+        loginButtons[1].style.display = 'none'; // Cacher le bouton Inscription
+        loginButtons[2].style.display = 'block'; // Afficher le bouton Déconnexion
+      } else {
+        loginButtons[0].style.display = 'block'; // Afficher le bouton Connexion
+        loginButtons[1].style.display = 'block'; // Afficher le bouton Inscription
+        loginButtons[2].style.display = 'none'; // Cacher le bouton Déconnexion
+      }
+    });
+  </script>
 </body>
 </html>
+

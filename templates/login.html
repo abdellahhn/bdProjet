@@ -5,6 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Connexion</title>
   <link rel="stylesheet" href="../static/login.css">
+  <script type="text/javascript" src="../static/api.js"></script>
+  <style>
+    .notice {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      z-index: 10; /* Ensure notice is displayed above other elements */
+      display: none; /* Initially hide the notice */
+    }
+
+    .notice.success {
+      background-color: #dff0d8;
+      border-color: #d0e0c6;
+    }
+
+    .notice.error {
+      background-color: #f7d7d7;
+      border-color: #f5c6cb;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -21,7 +47,8 @@
   <main>
     <section class="login">
       <h1>Connexion</h1>
-      <form action="/login" method="post">
+      <div id="login-notice" class="notice"></div>
+      <form id="login-form" method="post">
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
         <br>
@@ -29,10 +56,10 @@
         <input type="password" id="motdepasse" name="motdepasse" required>
         <br>
         <br>
-        <button type="submit">Se connecter</button>
+        <button type="submit" onClick="logIn()">Se connecter</button>
       </form>
     </section>
   </main>
-  <script src="../script/login.js"></script>
+
 </body>
 </html>

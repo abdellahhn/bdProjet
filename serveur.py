@@ -3,7 +3,7 @@ import hashlib
 from flask import Flask, render_template, request, jsonify
 import pymysql, pymysql.cursors
 from passlib.hash import sha256_crypt
-from Database import getProductsFromDataBase, addNewClientToDB
+from Database import getProductsFromDataBase, addNewClientToDB, verifUtilisateur, addProductToCartInDataBase
 
 app = Flask(__name__)
 
@@ -57,25 +57,75 @@ def createNewUsers():
         genre = data["genre"]
         password = data["password"]
 
-        hasher = hashlib.sha3_224()
-        hasher.update(password.encode('utf-8'))
+        # hashed_password = sha256_crypt.encrypt(password)  # Implement hashing if needed
 
-        print(hasher)
-        print(hasher.update(password.encode('utf-8')))
-        print(hasher.hexdigest())
+        new_user_id = addNewClientToDB(email, password, nom, prenom, genre, age, adresse)
 
-        addNewClientToDB(email, password, nom, prenom, genre, age, adresse)
+        if new_user_id:
+            message = "Compte créé avec succès!"
+            message_type = "success"
+        else:
+            message = "Une erreur est survenue lors de la création du compte."
+            message_type = "error"
+
+        signup_notice = {
+            "message": message,
+            "type": message_type
+        }
+        return jsonify(signup_notice)
+
+    except Exception as e:
+        print("Error:", e)
+        message = "Une erreur est survenue lors de la création du compte."
+        message_type = "error"
+        signup_notice = {
+            "message": message,
+            "type": message_type
+        }
+        return jsonify(signup_notice), 500
+
+
+@app.route("/login", methods=["POST"])
+def connection():
+    data = request.json
+
+    email = data["email"]
+    password = data["motdepasse"]
+
+    # hasher = hashlib.sha3_224()
+    # hasher.update(password.encode('utf-8'))
+    # password = hasher.hexdigest()
+
+    presentInDb = verifUtilisateur(email, password)
+    print(presentInDb)
+
+    if presentInDb:
         response = {
             "status": 200
         }
-        return jsonify(response)
-    except Exception as e:
-        print("Error", e)
-        reponse = {
-            "status": 500,
-            "message": "erreur pendant requete"
+    else:
+        response = {
+            "status": 403,
+            "reason": "L’adresse e-mail ou le mot de passe que vous avez saisi(e) n’est pas associé(e) à un compte"
         }
-        return jsonify(reponse), 500
+
+    return jsonify(response)
+
+
+@app.route("/addProductToCart", methods=["POST"])
+def addProductToCart():
+    data = request.json
+
+    email = data["email"]
+    quantite = data["quantite"]
+
+    addProductToCartInDataBase(quantite, email)
+
+    response = {
+        "status": 200
+    }
+    return jsonify(response)
+
 
 
 if __name__ == "__main__":
