@@ -24,23 +24,23 @@ ALTER TABLE Client
 MODIFY COLUMN id_client INT AUTO_INCREMENT PRIMARY KEY;
 
 DROP TABLE IF EXISTS Acheter;
-CREATE TABLE Acheter (id_Achat char(25) primary key REFERENCES Transaction(id_Transaction), id_client char(25) REFERENCES Client(id_client), id_Article char(15) REFERENCES Article(id_Article));
+CREATE TABLE Acheter (id_Achat VARCHAR(200) primary key REFERENCES Transaction(id_Transaction), id_client char(25) REFERENCES Client(id_client), id_Article char(15) REFERENCES Article(id_Article));
 SELECT * FROM Acheter;
 
 DROP TABLE IF EXISTS Transaction;
-CREATE TABLE Transaction (id_Transaction char(25) primary key, id_client char(25) REFERENCES Client(id_client), id_panier char(25) REFERENCES Panier(id_panier), prix int, date_transaction date, adresse_livraison varchar(55), ville_livraison varchar(25), postal_livraison varchar(20),pays_livraison varchar(25));
+CREATE TABLE Transaction (id_Transaction VARCHAR(200) primary key, id_client char(25) REFERENCES Client(id_client), id_panier varchar(36) REFERENCES Panier(id_panier), prix int, date_transaction date, adresse_livraison varchar(55));
 SELECT * FROM Transaction;
 
 DROP TABLE IF EXISTS Avis;
-CREATE TABLE Avis (id_Avis char(25) primary key, id_Article char(15) REFERENCES Article(id_Article), id_client char(25) REFERENCES Client(id_client), Note int, Commentaire varchar(55));
+CREATE TABLE Avis (id_Avis varchar(200) primary key, id_Article char(15) REFERENCES Article(id_Article), id_client char(25) REFERENCES Client(id_client), Note int, Commentaire varchar(55));
 SELECT * FROM Avis;
 
 DROP TABLE IF EXISTS Carte_de_crédit;
-CREATE TABLE Carte_de_crédit (numero_carte int primary key, type varchar(25), date_expiration date, code_sécurité int, nom varchar(60));
+CREATE TABLE Carte_de_crédit (numero_carte varchar(30) primary key, type varchar(25), date_expiration date, code_sécurité int, nom varchar(60));
 SELECT * FROM Carte_de_crédit;
 
 DROP TABLE IF EXISTS panier;
-CREATE TABLE panier (id_panier int AUTO_INCREMENT primary key , id_Article char(15) references Article(id_Article), id_client char(25) references Client(id_client), quantite int, prix_total int);
+CREATE TABLE panier (id_panier varchar(36) primary key , id_Article char(15) references Article(id_Article), id_client char(25) references Client(id_client), quantite int, prix_total int);
 SELECT * FROM panier;
 
 DROP TABLE IF EXISTS connexion_client;

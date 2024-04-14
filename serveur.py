@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, jsonify, session
 import pymysql, pymysql.cursors
 from passlib.hash import sha256_crypt
 from Database import getProductsFromDataBase, addNewClientToDB, verifUtilisateur, addProductToCartInDataBase, \
-    addArticleToDB, getProductsFromPanier
+    addArticleToDB, getProductsFromPanier, acheterCommandesDB, get_articles_purchased, ajouterUnAvis
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -32,24 +32,57 @@ def panier():
         return "Utilisateur non connecté", 401
 
 
-# @app.route("/Confirmation")
-# def confirmatin():
-#     return render_template("confirmation.html")
+@app.route("/donnerAvis", methods=["GET"])
+def voirAvis():
+    global user_email
+
+    if user_email:
+        achat = get_articles_purchased(user_email)  # Récupère les produits du panier de l'utilisateur
+        return render_template("donnerAvis.html", achats=achat, user_email=user_email)
+    else:
+        return "Utilisateur non connecté", 401
 
 
-# @app.route("/commandes", methods=["GET"])
-# def commandes():
-#     return render_template("commades.html", )
+from flask import jsonify, request
 
 
-# @app.route("/panier", methods=["GET"])
-# def Panier():
-#     return render_template("panier.html")
+@app.route("/donnerAvis", methods=["POST"])
+def donnerAvis():
+    global user_email  # Si vous utilisez une variable globale pour stocker l'email de l'utilisateur
+
+    data = request.json
+    email = data["email"]
+    avis_list = data["rowsData"]  # Assurez-vous de récupérer les données correctement
+
+    presentInDb = ajouterUnAvis(email, avis_list)  # Assurez-vous d'avoir cette fonction
+
+    if presentInDb:
+        user_email = email  # Mettez à jour l'email de l'utilisateur si nécessaire
+        response = {"status": 200, "message": "Avis ajoutés avec succès"}
+    else:
+        response = {
+            "status": 403,
+            "message": "Échec de l'ajout des avis. Veuillez réessayer plus tard."
+        }
+
+    return jsonify(response)
+
+
+@app.route("/commandes", methods=["GET"])
+def commandes():
+    return render_template("commandes.html")
 
 
 @app.route("/signup", methods=["GET"])
 def inscription():
     return render_template("signup.html")
+
+
+@app.route("/logout", methods=["GET"])
+def deconnexion():
+    global user_email
+    user_email = None
+    return render_template("home.html")
 
 
 @app.route("/login", methods=["GET"])
@@ -171,6 +204,32 @@ def addArticle():
         response = {
             "status": 500,
             "message": "Erreur lors de l'ajout de l'article."
+        }
+
+    return jsonify(response)
+
+
+@app.route("/commandes", methods=["POST"])
+def acheterCommandes():
+    data = request.json
+
+    email = data["email"]
+    type = data["type"]
+    numero = data["numero"]
+    code = data["code"]
+    date = data["date"]
+
+    added = acheterCommandesDB(email, type, numero, code, date)
+
+    if added:
+        response = {
+            "status": 200,
+            "message": "Panier Acheté avec succès!"
+        }
+    else:
+        response = {
+            "status": 500,
+            "message": "Erreur lors de l'achat."
         }
 
     return jsonify(response)

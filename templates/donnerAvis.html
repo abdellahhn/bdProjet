@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notation et Avis</title>
+    <script type="text/javascript" src="../static/api.js"></script>
+  <link rel="stylesheet" href="../static/panier.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+        td {
+            text-align: left;
+        }
+        input[type="number"] {
+            width: 50px;
+        }
+        textarea {
+            width: 100%;
+            height: 80px;
+            resize: vertical;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+      <a href="/" class="logo">Mon logo</a>
+      <ul>
+        <li><a href="/">Accueil</a></li>
+        <li><a href="/panier">Panier</a></li>
+        <li><a href="/commandes">Commandes</a></li>
+        <li><a href="/signup">Inscription</a></li>
+      </ul>
+    </nav>
+  </header>
+<main>
+    <h1>Notation et Avis</h1>
+    <form action="/donnerAvis" id="donnezAvis" method="POST">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom de l'article</th>
+                    <th>Marque</th>
+                    <th>Note (sur 5)</th>
+                    <th>Avis</th>
+                </tr>
+            </thead>
+              <tbody>
+                {% for achat in achats %}
+            <tr>
+                <td id="nom_{{ loop.index }}">{{ achat[0] }}</td>
+                <td id="marque_{{ loop.index }}">{{ achat[1] }}</td>
+                <td><input type="number" name="note" min="0" max="5" step="0.1"></td>
+                <td><textarea name="avis"></textarea></td>
+                <td><button type="submit" id="submitBtn_{{ loop.index }}" data-index="{{ loop.index }}">Soumettre</button></td>
+            </tr>
+
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    </main>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const submitButtons = document.querySelectorAll('[id^="submitBtn_"]');
+
+    submitButtons.forEach(btn => {
+        btn.addEventListener('click', ajouterUnAvis);
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Sélectionnez tous les boutons Soumettre
+    const submitButtons = document.querySelectorAll('[id^="submitBtn_"]');
+
+    // Ajoutez un gestionnaire d'événements à chaque bouton
+    submitButtons.forEach(btn => {
+        btn.addEventListener('click', ajouterUnAvis);
+    });
+});
+
+async function ajouterUnAvis(event) {
+    debugger;
+    event.preventDefault();
+
+    const formData = new FormData(document.getElementById('donnezAvis'));
+    const nom = document.getElementById(`nom_${this.dataset.index}`).textContent.trim();
+    const marque = document.getElementById(`marque_${this.dataset.index}`).textContent.trim();
+    const note = formData.get('note');
+    const avis = formData.get('avis');
+
+    const rowsData = [{ nom, marque, note, avis }];
+
+    try {
+        const res = await fetch("/donnerAvis", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                email: user[0],
+                rowsData: rowsData,
+            })
+        });
+
+        if (!res.ok) {
+            throw new Error("Échec de l'ajout des avis. Vérifiez la réponse du serveur.");
+        }
+
+        const data = await res.json();
+        console.log(data); // Gérez la réponse du serveur comme nécessaire
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+</script>
+</html>

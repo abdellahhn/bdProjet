@@ -1,3 +1,5 @@
+import uuid
+
 import pymysql
 
 
@@ -69,7 +71,6 @@ def getProductsFromPanier(user_email):
         return []
 
 
-
 def addNewClientToDB(email, password, nom, prenom, genre, age, adresse):
     connection = establish_connection()
     if connection:
@@ -118,7 +119,8 @@ def addProductToCartInDataBase(nom, quantite, email, prix):
                 article_id = cursor.fetchone()[0]
                 print(article_id)
 
-                request = ("INSERT INTO panier (id_Article, id_client, quantite, prix_total) VALUES (%s, %s, %s, %s)")
+                request = ("INSERT INTO panier (id_panier, id_Article, id_client, quantite, prix_total) VALUES (UUID("
+                           "), %s, %s, %s, %s)")
                 cursor.execute(request, (article_id, client_id, quantite, prix))
 
                 connection.commit()
@@ -167,6 +169,228 @@ def dropCartInDataBase(id_client):
         finally:
             if connection:
                 connection.close()
+
+
+def acheterCommandesDB(email, type, numero, code, date):
+    connection = establish_connection()
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                # Insérer les données de la carte de crédit
+                request_carte = """
+                    INSERT INTO Carte_de_crédit (numero_carte, type, date_expiration, code_sécurité, nom)
+                    VALUES (%s, %s, %s, %s, 'lol')
+                """
+                cursor.execute(request_carte, (numero, type, date, code))
+                connection.commit()
+                print("Données de carte de crédit insérées avec succès!")
+
+                client_info = get_client_info(email)
+                if client_info:
+                    id_client, adresse_livraison = client_info
+
+                    id_paniers = get_id_panier(id_client)  # Obtenez tous les ID de panier
+                    print("bite", id_paniers)
+                    if id_paniers:
+                        prix_total = 100  # Utilisez le montant réel de la transaction
+                        for id_panier in id_paniers:
+                            id_transaction = insert_transaction(id_client, id_panier, prix_total, date,
+                                                                adresse_livraison,
+                                                                cursor, connection)
+                            print("hoh", id_transaction)
+                            print(f"Transaction pour le panier {id_panier} ajoutée avec succès!")
+                            articles_panier = get_articles_panier(id_client, id_panier)
+                            print("lkl", articles_panier)
+                            if articles_panier:
+                                for id_article in articles_panier:
+                                    request_acheter = """
+                                        INSERT INTO Acheter (id_Achat, id_client, id_Article)
+                                        VALUES (%s, %s, %s)
+                                    """
+                                    cursor.execute(request_acheter, (id_transaction, id_client, id_article))
+                                    connection.commit()
+                                print(
+                                    f"Articles achetés du panier {id_panier} ajoutés avec succès dans la table Acheter.")
+                            else:
+                                print(f"Aucun article trouvé dans le panier {id_panier}.")
+                    else:
+                        print("Aucun panier trouvé pour ce client.")
+                else:
+                    print("Aucun client trouvé avec cet email.")
+        except pymysql.Error as err:
+            print(f"Erreur lors de l'insertion des données: {err}")
+        finally:
+            if connection:
+                connection.close()
+
+
+def insert_transaction(id_client, id_panier, prix_total, date, adresse_livraison, cursor, connection):
+    try:
+        transaction_id = uuid.uuid4()
+
+        request_transaction = """
+            INSERT INTO Transaction (id_Transaction, id_client, id_panier, prix, date_transaction, adresse_livraison)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(request_transaction, (
+            transaction_id,
+            id_client,
+            id_panier,
+            prix_total,
+            date,
+            adresse_livraison
+        ))
+        connection.commit()
+
+        return transaction_id
+
+    except pymysql.Error as err:
+        print(f"Erreur lors de l'insertion de la transaction: {err}")
+        connection.rollback()  # Rollback on error
+        return None
+
+
+def get_client_info(email):
+    connection = establish_connection()
+    client_info = None
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id_client, adresse FROM Client WHERE email = %s", (email,))
+                client_info = cursor.fetchone()
+        except pymysql.Error as err:
+            print(f"Erreur lors de la récupération des informations du client: {err}")
+        finally:
+            if connection:
+                connection.close()
+    return client_info
+
+
+def get_id_panier(id_client):
+    connection = establish_connection()
+    paniers_info = []
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id_panier FROM Panier WHERE id_client = %s", (id_client,))
+                paniers_info = cursor.fetchall()  # Récupère tous les résultats au lieu d'un seul
+        except pymysql.Error as err:
+            print(f"Erreur lors de la récupération des IDs de panier: {err}")
+        finally:
+            if connection:
+                connection.close()
+    return paniers_info
+
+
+def get_articles_panier(id_client, id_panier):
+    connection = establish_connection()
+    articles_panier = []
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id_Article FROM panier WHERE id_client = %s and id_Panier = %s",
+                               (id_client, id_panier))
+                articles_panier = cursor.fetchone()
+        except pymysql.Error as err:
+            print(f"Erreur lors de la récupération des articles du panier: {err}")
+        finally:
+            if connection:
+                connection.close()
+    return articles_panier
+
+
+def get_client_id(email):
+    connection = establish_connection()
+    client_id = None
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id_client FROM Client WHERE email = %s", (email,))
+                result = cursor.fetchone()
+                if result:
+                    client_id = result[0]
+        except pymysql.Error as err:
+            print(f"Erreur lors de la récupération de l'ID du client: {err}")
+        finally:
+            if connection:
+                connection.close()
+    print(client_id)
+    return client_id
+
+
+def get_articles_purchased(email):
+    connection = establish_connection()
+    id_client = get_client_id(email)
+    articles_info = []
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id_Article FROM Acheter WHERE id_client = %s", (id_client,))
+                results = cursor.fetchall()
+                for row in results:
+                    article_id = row[0]
+                    print(article_id)
+                    cursor.execute("SELECT Nom_Article, Marque FROM Article WHERE id_Article = %s", (article_id,))
+                    article_info = cursor.fetchone()
+                    if article_info:
+                        articles_info.append(article_info)
+        except pymysql.Error as err:
+            print(f"Erreur lors de la récupération des articles achetés: {err}")
+        finally:
+            if connection:
+                connection.close()
+    return articles_info
+
+
+def ajouterUnAvis(email, avis_list):
+    connection = establish_connection()
+    id_client = get_client_id(email)
+    if connection and id_client:
+        try:
+            with connection.cursor() as cursor:
+                for avis_data in avis_list:
+                    nom = avis_data["nom"]
+                    marque = avis_data["marque"]
+                    note = avis_data["note"]
+                    avis_commentaire = avis_data["avis"]
+
+                    id_article = get_article_id(nom, marque)
+                    if id_article:
+                        request_avis = """
+                            INSERT INTO Avis (id_Avis, id_Article, id_client, Note, Commentaire)
+                            VALUES (UUID(), %s, %s, %s, %s)
+                        """
+                        cursor.execute(request_avis, (id_article, id_client, note, avis_commentaire))
+                        connection.commit()
+                        print("Avis ajouté avec succès!")
+                    else:
+                        print(f"L'article {nom} de la marque {marque} n'a pas été trouvé.")
+        except pymysql.Error as err:
+            print(f"Erreur lors de l'insertion de l'avis: {err}")
+        finally:
+            if connection:
+                connection.close()
+    else:
+        print("Impossible d'ajouter l'avis. Vérifiez l'ID client ou la connexion.")
+
+
+def get_article_id(nom, marque):
+    connection = establish_connection()
+    article_id = None
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                # Requête pour obtenir l'ID de l'article en fonction du nom et de la marque
+                cursor.execute("SELECT id_Article FROM Article WHERE Nom_Article = %s AND Marque = %s", (nom, marque))
+                result = cursor.fetchone()
+                if result:
+                    article_id = result[0]  # L'ID de l'article est le premier élément du résultat
+        except pymysql.Error as err:
+            print(f"Erreur lors de la récupération de l'ID de l'article: {err}")
+        finally:
+            if connection:
+                connection.close()
+    return article_id
 
 
 if __name__ == "__main__":

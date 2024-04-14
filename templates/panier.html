@@ -41,8 +41,17 @@
       <div class="total">
         <span>Total:</span>
         <span class="prix-total">--€</span>  </div>
-      <button type="button" class="commander">Commander</button>
+      <button type="button" class="commander" href="/commandes">Commander</button>
     </section>
   </main>
+<script>
+        const btnCommander = document.querySelector('.commander');
+
+        // Ajoutez un gestionnaire d'événements au clic sur le bouton
+        btnCommander.addEventListener('click', function() {
+            // Redirigez l'utilisateur vers la page des commandes
+            window.location.href = '/commandes';
+        });
+    </script>
 </body>
 </html>

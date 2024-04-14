@@ -20,9 +20,8 @@ export default function handleSignupForm() {
     })
     .then(response => response.json())
     .then(data => {
-      signupNotice.textContent = data.message; // Update notice text
-      signupNotice.classList.add(data.type); // Add CSS class for styling
-      // Optionally: Clear the form after successful signup
+      signupNotice.textContent = data.message;
+      signupNotice.classList.add(data.type);
       if (data.type === 'success') {
         signupForm.reset();
       }

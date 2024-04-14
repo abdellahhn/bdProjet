@@ -141,12 +141,12 @@ async function addProduitAuPanier(nom, prix, quantite) {
 }
 
 
-async function addArticleToDatabase(event) {
+async function addArticleToDatabase() {
+    debugger;
     if (user.length === 0) {
             window.location.href= "http://127.0.0.1:5000";
 
     } else {
-        event.preventDefault();
 
         // Get the form element by its ID
         const form = document.getElementById('ajtArticle'); // Replace with your actual form ID
@@ -198,22 +198,41 @@ async function logout() {
 }
 
 
-async function getProduitDuPanier() {
+async function acheterCommandesAPI(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+    debugger;
     if (user.length === 0) {
         window.location.href = "http://127.0.0.1:5000";
     } else {
+        const form = document.getElementById('acheterPanier');
+
+        const formData = new FormData(form);
+
+    const cardType = document.getElementById('card_type').value;
+    const cardNumber = Number(document.getElementById('card_number').value);
+    const securityCode = Number(document.getElementById('security_code').value);
+    const expirationDate = document.getElementById('expiration_date').value;
+
         try {
-            const res = await fetch(`/panier?email=${encodeURIComponent(user[0])}`, {
-                method: "GET",
+            const res = await fetch("/commandes", {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                }
+                },
+                body: JSON.stringify({
+                    email: user[0],
+                    type: cardType,
+                    numero: cardNumber,
+                    code: securityCode,
+                    date: expirationDate,
+                })
             });
 
-            if (!res.ok) {
-                throw new Error("Failed to fetch cart items. Check server response.");
-            }
 
+            if (!res.ok) {
+                throw new Error("Échec de l'ajout de l'article. Vérifiez la réponse du serveur.");
+            }
             return await res.json();
         } catch (error) {
             console.error("Error:", error);
@@ -221,4 +240,6 @@ async function getProduitDuPanier() {
         }
     }
 }
+
+
 
