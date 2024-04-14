@@ -17,7 +17,7 @@ CREATE TABLE Client (id_client int AUTO_INCREMENT primary key, email varchar(40)
 SELECT * FROM Client;
 
 DROP TABLE IF EXISTS Article;
-CREATE TABLE Article (id_Article char(15) primary key, quantite int, type varchar(25), prix int, Marque varchar(50), Nom_Article varchar(25), note_moyenne double);
+CREATE TABLE Article (id_Article int AUTO_INCREMENT primary key, quantite int, type varchar(25), prix int, Marque varchar(50), Nom_Article varchar(25), note_moyenne double);
 SELECT * FROM Article;
 
 ALTER TABLE Client
@@ -40,7 +40,7 @@ CREATE TABLE Carte_de_crédit (numero_carte int primary key, type varchar(25), d
 SELECT * FROM Carte_de_crédit;
 
 DROP TABLE IF EXISTS panier;
-CREATE TABLE panier (id_panier char(36) primary key , id_Article char(15) references Article(id_Article), id_client char(25) references Client(id_client), quantite int, prix_total int);
+CREATE TABLE panier (id_panier int AUTO_INCREMENT primary key , id_Article char(15) references Article(id_Article), id_client char(25) references Client(id_client), quantite int, prix_total int);
 SELECT * FROM panier;
 
 DROP TABLE IF EXISTS connexion_client;
@@ -324,8 +324,8 @@ END
 #     ('ghjerfe', 'MERCCR7NK', 'ALUV45', 6.5, 'Larticle est bien mais pas trés top quand même.');
 # INSERT INTO Acheter(id_Achat, id_client, id_Article) VALUES ('zaee', 'ezrjr', 'erzrr');
 INSERT INTO Article(id_Article, quantite, type, prix, Marque, Nom_Article, note_moyenne) values
-    ('AZEXCFE45VFE89', 4, 'Complément alimentaire', 45, 'Venum', 'Gants de boxe Venum', 3),
-    ('MERCCR7NK', 3, 'Crampons de foot', 100, 'Nike', 'Mercurial CR7 Edition', 5);
+    (id_Article, 4, 'Complément alimentaire', 45, 'Venum', 'Gants de boxe Venum', 3),
+    (id_Article, 3, 'Crampons de foot', 100, 'Nike', 'Mercurial CR7 Edition', 5);
 # INSERT INTO Carte_de_crédit(numero_carte, type, date_expiration, code_sécurité, nom) VALUES (45401202, 'Visa', 12-01-2023, 459, 'Mirabel', 'Paul');
 # insert into Transaction(id_Transaction, id_client, id_Article, date_transaction, adresse_livraison, ville_livraison, postal_livraison, pays_livraison, prix)  values ('zaeezaze', 'ALUXC78', 'HGTRDG45', 30-10-2005, '2220 Avenue Sainte-foy', 'Québec', 'G1V F74', 'Canada', 450);
 
