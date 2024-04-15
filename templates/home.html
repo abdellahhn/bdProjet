@@ -10,20 +10,23 @@
 <body>
   <header>
     <nav>
-      <a href="/" class="logo">Mon logo</a>
-      <ul>
-        <li><a href="/">Accueil</a></li>
-        <li><a href="/panier?email={{ user_email }}">Panier</a></li>
-        <li><a href="/voirAvis">Vos Avis</a></li>
-        <li><a href="/donnerAvis">Donnez Avis</a></li>
-        <li id="login-buttons">
-          <!-- Add IDs or classes to your login/logout links for JavaScript -->
-          <li><a href="/login" id="login-link">Connexion</a></li>
-          <li><a href="/signup">Inscription</a></li>
-          <li><a href="/logout" onclick="logout()" id="logout-link">Déconnexion</a></li>
-        </li>
-      </ul>
-    </nav>
+  <a href="/" class="logo">Mon logo</a>
+  <ul>
+    <li><a href="/">Accueil</a></li>
+    <li><a href="/panier?email={{ user_email }}">Panier</a></li>
+    <li><a href="/voirAvis">Vos Avis</a></li>
+    <li><a href="/donnerAvis">Donnez Avis</a></li>
+    <li id="login-buttons">
+      <!-- Condition pour afficher les liens Connexion/Inscription ou Déconnexion en fonction de l'état de la variable user_email -->
+      {% if user_email %}
+        <li><a href="/logout" onclick="logout()" id="logout-link">Déconnexion</a></li>
+      {% else %}
+        <li><a href="/login" id="login-link">Connexion</a></li>
+        <li><a href="/signup">Inscription</a></li>
+      {% endif %}
+    </li>
+  </ul>
+</nav>
   </header>
   <main>
     <section class="recherche">
@@ -42,13 +45,12 @@
         <h3>{{ product[5] }}</h3>
         <p>{{ product[4] }}</p>
         <span class="prix" id="prix">{{ product[3] }}</span>
-        <a href="/article/{{ product[0] }}">Voir l'article</a>
         <select name="quantite" class="quantity-select">
           {% for qty in range(1, product[1]+1) %}
           <option value="{{ qty }}">{{ qty }}</option>
           {% endfor %}
         </select>
-        <button onclick="addProduitAuPanier('{{ product[5] }}', '{{ product[3] }}', '{{ product[1]+1 }}')">Ajouter au panier</button>
+  <button onclick="addProduitAuPanier('{{ product[5] }}', '{{ product[3] }}', this.parentNode.querySelector('.quantity-select').value)">Ajouter au panier</button>
       </article>
       {% endfor %}
       <h3>Ajouter un nouvel article</h3>

@@ -126,7 +126,6 @@ async function addProduitAuPanier(nom, prix, quantite) {
                 })
             });
 
-            console.log(nomArticle)
 
             if (!res.ok) {
                 throw new Error("Échec de l'ajout de l'article. Vérifiez la réponse du serveur.");
@@ -193,6 +192,7 @@ async function addArticleToDatabase() {
 }
 
 async function logout() {
+    debugger
     user.length = 0;
     window.location.href = "http://127.0.0.1:5000";
 }
@@ -238,6 +238,30 @@ async function acheterCommandesAPI(event) {
             console.error("Error:", error);
             throw error;
         }
+    }
+}
+
+async function viderPanier() {
+    try {
+        const response = await fetch("/viderPanier", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email: user[0] })
+        });
+
+        if (!response.ok) {
+            throw new Error("Erreur lors de la suppression du panier.");
+        }
+
+        const data = await response.json();
+        console.log(data.message); // Afficher le message de la réponse
+
+        // Traitez la réponse comme nécessaire ici
+    } catch (error) {
+        console.error("Erreur:", error);
+        // Gérez les erreurs comme nécessaire
     }
 }
 

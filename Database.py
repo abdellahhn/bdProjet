@@ -183,16 +183,14 @@ def acheterCommandesDB(email, type, numero, code, date):
                 """
                 cursor.execute(request_carte, (numero, type, date, code))
                 connection.commit()
-                print("Données de carte de crédit insérées avec succès!")
 
                 client_info = get_client_info(email)
                 if client_info:
                     id_client, adresse_livraison = client_info
 
                     id_paniers = get_id_panier(id_client)  # Obtenez tous les ID de panier
-                    print("bite", id_paniers)
                     if id_paniers:
-                        prix_total = 100  # Utilisez le montant réel de la transaction
+                        prix_total = 100
                         for id_panier in id_paniers:
                             id_transaction = insert_transaction(id_client, id_panier, prix_total, date,
                                                                 adresse_livraison,
@@ -299,6 +297,38 @@ def get_articles_panier(id_client, id_panier):
     return articles_panier
 
 
+def getAvisForUser(email):
+    connection = establish_connection()
+    id_user = get_client_id(email)
+    avis_list = []
+
+    if connection and id_user:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT Avis.id_Article, Avis.Note, Avis.Commentaire
+                    FROM Avis
+                    WHERE Avis.id_client = %s
+                """, (id_user,))
+                avis_rows = cursor.fetchall()
+
+                for row in avis_rows:
+                    avis = {
+                        "id_article": row[0],
+                        "note": row[1],
+                        "commentaire": row[2]
+                    }
+                    avis_list.append(avis)
+
+        except pymysql.Error as err:
+            print(f"Erreur lors de la récupération des avis: {err}")
+        finally:
+            if connection:
+                connection.close()
+
+    return avis_list
+
+
 def get_client_id(email):
     connection = establish_connection()
     client_id = None
@@ -380,7 +410,6 @@ def get_article_id(nom, marque):
     if connection:
         try:
             with connection.cursor() as cursor:
-                # Requête pour obtenir l'ID de l'article en fonction du nom et de la marque
                 cursor.execute("SELECT id_Article FROM Article WHERE Nom_Article = %s AND Marque = %s", (nom, marque))
                 result = cursor.fetchone()
                 if result:
@@ -394,5 +423,5 @@ def get_article_id(nom, marque):
 
 
 if __name__ == "__main__":
-    products = getProductsFromPanier("abdellahhanane44@gmail.com")
-    print(products)  # Test fetching products
+    avis = getAvisForUser("abdellahhanane44@gmail.com")
+    print(avis)  # Test fetching products

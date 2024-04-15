@@ -15,7 +15,6 @@
         <li><a href="/">Accueil</a></li>
         <li><a href="/panier">Panier</a></li>
         <li><a href="/commandes">Commandes</a></li>
-        <li><a href="/signup">Inscription</a></li>
       </ul>
     </nav>
   </header>
@@ -33,25 +32,46 @@
         <tbody>
           {% for product in products %}
           <tr>
-            <td>{{ product.article_name }}</td>  <td>{{ product.quantity }}</td>
-            <td>{{ product.total_price }}€</td>  </tr>
+            <td>{{ product.article_name }}</td>
+            <td>{{ product.quantity }}</td>
+            <td>{{ product.total_price }}€</td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
       <div class="total">
         <span>Total:</span>
-        <span class="prix-total">--€</span>  </div>
-      <button type="button" class="commander" href="/commandes">Commander</button>
+        <span class="prix-total" id="total-price">--€</span>
+      </div>
+      <button type="button" class="commander">Commander</button>
+      <button type="button" class="Vider" onclick="viderPanierr()">Vider</button>
     </section>
   </main>
 <script>
-        const btnCommander = document.querySelector('.commander');
+  // Calculate and update total price
+  document.addEventListener('DOMContentLoaded', function() {
+    const totalPriceElement = document.getElementById('total-price');
+    const prices = document.querySelectorAll('.table-panier tbody tr td:nth-child(3)');
+    let totalPrice = 0;
 
-        // Ajoutez un gestionnaire d'événements au clic sur le bouton
-        btnCommander.addEventListener('click', function() {
-            // Redirigez l'utilisateur vers la page des commandes
-            window.location.href = '/commandes';
-        });
-    </script>
+    prices.forEach(price => {
+      totalPrice += parseFloat(price.textContent.replace('€', ''));
+    });
+
+    totalPriceElement.textContent = totalPrice.toFixed(2) + '€';
+  });
+
+  // Redirect to orders page
+  const btnCommander = document.querySelector('.commander');
+  btnCommander.addEventListener('click', function() {
+    window.location.href = '/commandes';
+  });
+
+  // Function to empty cart (Assuming viderPanier() exists in your API.js file)
+  function viderPanierr() {
+    viderPanier(); // Call the function from API.js to empty the cart
+    window.location.reload(); // Reload the page after emptying the cart
+  }
+</script>
 </body>
 </html>

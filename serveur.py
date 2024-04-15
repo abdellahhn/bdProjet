@@ -4,7 +4,8 @@ from flask import Flask, render_template, request, jsonify, session
 import pymysql, pymysql.cursors
 from passlib.hash import sha256_crypt
 from Database import getProductsFromDataBase, addNewClientToDB, verifUtilisateur, addProductToCartInDataBase, \
-    addArticleToDB, getProductsFromPanier, acheterCommandesDB, get_articles_purchased, ajouterUnAvis
+    addArticleToDB, getProductsFromPanier, acheterCommandesDB, get_articles_purchased, ajouterUnAvis, get_client_id, \
+    dropCartInDataBase, getAvisForUser
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -15,8 +16,9 @@ user_email = None
 
 @app.route("/")
 def main():
+    global user_email
     products = getProductsFromDataBase()
-    return render_template("home.html", products=products)
+    return render_template("home.html", user_email=user_email, products=products)
 
 
 @app.route("/panier", methods=["GET"])
@@ -43,7 +45,16 @@ def voirAvis():
         return "Utilisateur non connecté", 401
 
 
-from flask import jsonify, request
+@app.route("/voirAvis", methods=["GET"])
+def voirAvisDonne():
+    global user_email
+
+    if user_email:
+        avis = getAvisForUser(user_email)
+        print(avis)
+        return render_template("voirAvis.html", avis=avis, user_email=user_email)
+    else:
+        return "Utilisateur non connecté", 401
 
 
 @app.route("/donnerAvis", methods=["POST"])
@@ -173,16 +184,18 @@ def addProductToCart():
     return jsonify(response)
 
 
-# @app.route("/viderPanier", methods=["POST"])
-# def viderCart():
-#     data = request.json
-#
-#     email = data["email"]
-#     dropCartInDataBase(email)
-#     response = {
-#         "status": 200
-#     }
-#     return jsonify(response)
+@app.route("/viderPanier", methods=["POST"])
+def viderCart():
+    data = request.json
+
+    email = data["email"]
+    client_id = get_client_id(email)
+    dropCartInDataBase(client_id)
+    response = {
+        "status": 200
+    }
+    return jsonify(response)
+
 
 @app.route("/addArticle", methods=["POST"])
 def addArticle():
@@ -222,6 +235,10 @@ def acheterCommandes():
     added = acheterCommandesDB(email, type, numero, code, date)
 
     if added:
+        client_id = get_client_id(email)
+        if client_id:
+            dropCartInDataBase(client_id)
+
         response = {
             "status": 200,
             "message": "Panier Acheté avec succès!"

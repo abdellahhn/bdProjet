@@ -17,7 +17,7 @@ CREATE TABLE Client (id_client int AUTO_INCREMENT primary key, email varchar(40)
 SELECT * FROM Client;
 
 DROP TABLE IF EXISTS Article;
-CREATE TABLE Article (id_Article int AUTO_INCREMENT primary key, quantite int, type varchar(25), prix int, Marque varchar(50), Nom_Article varchar(25), note_moyenne double);
+CREATE TABLE Article (id_Article int AUTO_INCREMENT primary key, image varchar(10000),quantite int, type varchar(25), prix int, Marque varchar(50), Nom_Article varchar(25), note_moyenne double);
 SELECT * FROM Article;
 
 ALTER TABLE Client
@@ -324,8 +324,8 @@ END
 #     ('ghjerfe', 'MERCCR7NK', 'ALUV45', 6.5, 'Larticle est bien mais pas trés top quand même.');
 # INSERT INTO Acheter(id_Achat, id_client, id_Article) VALUES ('zaee', 'ezrjr', 'erzrr');
 INSERT INTO Article(id_Article, quantite, type, prix, Marque, Nom_Article, note_moyenne) values
-    (id_Article, 4, 'Complément alimentaire', 45, 'Venum', 'Gants de boxe Venum', 3),
-    (id_Article, 3, 'Crampons de foot', 100, 'Nike', 'Mercurial CR7 Edition', 5);
+    (id_Article, "https://cdn.shopify.com/s/files/1/0295/2563/9247/products/YeezySlidesRed_800x.png", 4, 'Complément alimentaire', 45, 'Venum', 'Gants de boxe Venum', 3),
+    (id_Article, "https://image.goat.com/1000/attachments/product_template_pictures/images/075/054/238/original/952291_00.png.png",3, 'Crampons de foot', 100, 'Nike', 'Mercurial CR7 Edition', 5);
 # INSERT INTO Carte_de_crédit(numero_carte, type, date_expiration, code_sécurité, nom) VALUES (45401202, 'Visa', 12-01-2023, 459, 'Mirabel', 'Paul');
 # insert into Transaction(id_Transaction, id_client, id_Article, date_transaction, adresse_livraison, ville_livraison, postal_livraison, pays_livraison, prix)  values ('zaeezaze', 'ALUXC78', 'HGTRDG45', 30-10-2005, '2220 Avenue Sainte-foy', 'Québec', 'G1V F74', 'Canada', 450);
 
