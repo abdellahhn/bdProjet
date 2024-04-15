@@ -116,7 +116,10 @@ def createNewUsers():
 
         # hashed_password = sha256_crypt.encrypt(password)  # Implement hashing if needed
 
-        new_user_id = addNewClientToDB(email, password, nom, prenom, genre, age, adresse)
+        hasher = hashlib.sha3_224()
+        hasher.update(password.encode('utf-8'))
+
+        new_user_id = addNewClientToDB(email, hasher.hexdigest(), nom, prenom, genre, age, adresse)
 
         if new_user_id:
             message = "Compte créé avec succès!"
@@ -149,6 +152,10 @@ def connection():
 
     email = data["email"]
     password = data["motdepasse"]
+
+    hasher = hashlib.sha3_224()
+    hasher.update(password.encode('utf-8'))
+    password = hasher.hexdigest()
 
     presentInDb = verifUtilisateur(email, password)
 

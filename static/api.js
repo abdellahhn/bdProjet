@@ -235,10 +235,18 @@ async function acheterCommandesAPI(event) {
             const messageElement = document.getElementById('message');
 
             if (res.ok) {
-                messageElement.textContent = "Paiement réussi !";
-            } else {
-                messageElement.textContent = "Erreur lors du paiement. Veuillez réessayer.";
-            }
+        const data = await res.text(); // Convertir la réponse en texte
+        const parsedData = JSON.parse(data); // Convertir le texte JSON en objet JavaScript
+
+        if (parsedData && parsedData.message === "succès") {
+            messageElement.textContent = "Paiement réussi !";
+        } else {
+            messageElement.textContent = "Erreur lors du paiement. Veuillez réessayer.";
+        }
+    } else {
+        const data = await res.json();
+        messageElement.textContent = data.message;
+    }
         } catch (error) {
             const messageElement = document.getElementById('message');
             console.error("Error:", error);

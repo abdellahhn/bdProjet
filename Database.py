@@ -2,6 +2,7 @@ import datetime
 import uuid
 
 import pymysql
+from flask import jsonify
 
 
 def establish_connection():
@@ -251,12 +252,17 @@ def acheterCommandesDB(email, type, numero, code, date):
                                 return True  # Indique que l'opération s'est déroulée avec succès
                             else:
                                 print(f"Aucun article trouvé dans le panier {id_panier}.")
+                                return False
                     else:
                         print("Aucun panier trouvé pour ce client.")
+                        return False
                 else:
                     print("Aucun client trouvé avec cet email.")
+                    return False
         except pymysql.Error as err:
-            print(f"Erreur lors de l'insertion des données: {err}")
+            error_message = f"Erreur lors de l'insertion des données: {err}"
+            print(error_message)
+            return False
         finally:
             if connection:
                 connection.close()
