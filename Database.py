@@ -190,15 +190,13 @@ def acheterCommandesDB(email, type, numero, code, date):
 
                     id_paniers = get_id_panier(id_client)  # Obtenez tous les ID de panier
                     if id_paniers:
-                        prix_total = 100
                         for id_panier in id_paniers:
+                            prix_total = getPrixTotal(id_client, id_paniers)
                             id_transaction = insert_transaction(id_client, id_panier, prix_total, date,
                                                                 adresse_livraison,
                                                                 cursor, connection)
-                            print("hoh", id_transaction)
                             print(f"Transaction pour le panier {id_panier} ajoutée avec succès!")
                             articles_panier = get_articles_panier(id_client, id_panier)
-                            print("lkl", articles_panier)
                             if articles_panier:
                                 for id_article in articles_panier:
                                     request_acheter = """
@@ -220,6 +218,31 @@ def acheterCommandesDB(email, type, numero, code, date):
         finally:
             if connection:
                 connection.close()
+
+
+def getPrixTotal(id_client, id_panier):
+    connection = establish_connection()
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                request_prix_total = """
+                    SELECT prix_total FROM panier 
+                    WHERE id_client = %s AND id_panier = %s
+                """
+                cursor.execute(request_prix_total, (id_client, id_panier))
+                result = cursor.fetchone()
+                if result:
+                    prix_total = result[0]
+                    return prix_total
+                else:
+                    print("Aucun prix total trouvé pour ces identifiants.")
+                    return None
+
+        except pymysql.Error as err:
+            print(f"Erreur lors de la récupération du prix total: {err}")
+            return None
+        finally:
+            connection.close()
 
 
 def insert_transaction(id_client, id_panier, prix_total, date, adresse_livraison, cursor, connection):
@@ -306,15 +329,16 @@ def getAvisForUser(email):
         try:
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT Avis.id_Article, Avis.Note, Avis.Commentaire
+                    SELECT Avis.id_Article, Avis.Note, Avis.Commentaire, Article.Nom_Article
                     FROM Avis
+                    INNER JOIN Article ON Avis.id_Article = Article.id_Article
                     WHERE Avis.id_client = %s
                 """, (id_user,))
                 avis_rows = cursor.fetchall()
 
                 for row in avis_rows:
                     avis = {
-                        "id_article": row[0],
+                        "nom_article": row[3],
                         "note": row[1],
                         "commentaire": row[2]
                     }
@@ -359,7 +383,6 @@ def get_articles_purchased(email):
                 results = cursor.fetchall()
                 for row in results:
                     article_id = row[0]
-                    print(article_id)
                     cursor.execute("SELECT Nom_Article, Marque FROM Article WHERE id_Article = %s", (article_id,))
                     article_info = cursor.fetchone()
                     if article_info:
@@ -369,6 +392,7 @@ def get_articles_purchased(email):
         finally:
             if connection:
                 connection.close()
+    print(articles_info)
     return articles_info
 
 

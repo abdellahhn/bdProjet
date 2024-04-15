@@ -193,13 +193,14 @@ async function addArticleToDatabase() {
 
 async function logout() {
     debugger
+    updateUserSession('')
     user.length = 0;
     window.location.href = "http://127.0.0.1:5000";
 }
 
 
 async function acheterCommandesAPI(event) {
-            event.preventDefault(); // Prevent the default form submission
+    event.preventDefault();
 
     debugger;
     if (user.length === 0) {

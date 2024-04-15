@@ -61,13 +61,11 @@
     totalPriceElement.textContent = totalPrice.toFixed(2) + '€';
   });
 
-  // Redirect to orders page
   const btnCommander = document.querySelector('.commander');
   btnCommander.addEventListener('click', function() {
     window.location.href = '/commandes';
   });
 
-  // Function to empty cart (Assuming viderPanier() exists in your API.js file)
   function viderPanierr() {
     viderPanier(); // Call the function from API.js to empty the cart
     window.location.reload(); // Reload the page after emptying the cart

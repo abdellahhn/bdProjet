@@ -41,16 +41,16 @@
     <section class="articles">
       {% for product in products %}
       <article class="article">
-        <img src="image-article.jpg" alt="Image de l'article">
-        <h3>{{ product[5] }}</h3>
-        <p>{{ product[4] }}</p>
-        <span class="prix" id="prix">{{ product[3] }}</span>
+        <img src="{{ product[1] }}" alt="Image de l'article"> <!-- Utilisation de la source d'image de la base de données -->
+        <h3>{{ product[6] }}</h3>
+        <p>{{ product[5] }}</p>
+        <span class="prix" id="prix">{{ product[4] }}</span>
         <select name="quantite" class="quantity-select">
-          {% for qty in range(1, product[1]+1) %}
+          {% for qty in range(1, product[2]+1) %}
           <option value="{{ qty }}">{{ qty }}</option>
           {% endfor %}
         </select>
-  <button onclick="addProduitAuPanier('{{ product[5] }}', '{{ product[3] }}', this.parentNode.querySelector('.quantity-select').value)">Ajouter au panier</button>
+  <button onclick="addProduitAuPanier('{{ product[6] }}', '{{ product[4] }}', this.parentNode.querySelector('.quantity-select').value)">Ajouter au panier</button>
       </article>
       {% endfor %}
       <h3>Ajouter un nouvel article</h3>
