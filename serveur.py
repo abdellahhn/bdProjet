@@ -5,7 +5,7 @@ import pymysql, pymysql.cursors
 from passlib.hash import sha256_crypt
 from Database import getProductsFromDataBase, addNewClientToDB, verifUtilisateur, addProductToCartInDataBase, \
     addArticleToDB, getProductsFromPanier, acheterCommandesDB, get_articles_purchased, ajouterUnAvis, get_client_id, \
-    dropCartInDataBase, getAvisForUser
+    dropCartInDataBase, getAvisForUser, addConnectionToDB
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -154,7 +154,7 @@ def connection():
 
     if presentInDb:
         user_email = email
-        print(user_email)
+        addConnectionToDB(email)
         response = {
             "status": 200
         }
@@ -205,8 +205,10 @@ def addArticle():
     prix = data["prix"]
     quantite = data["quantite"]
     marque = data["marque"]
+    image = data["image"]
+    type = data["type"]
 
-    added = addArticleToDB(quantite, nom, marque, prix)
+    added = addArticleToDB(quantite, nom, marque, prix, type, image)
 
     if added:
         response = {
@@ -236,9 +238,7 @@ def acheterCommandes():
 
     if added:
         client_id = get_client_id(email)
-        if client_id:
-            dropCartInDataBase(client_id)
-
+        dropCartInDataBase(client_id)
         response = {
             "status": 200,
             "message": "Panier Acheté avec succès!"

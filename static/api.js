@@ -147,7 +147,6 @@ async function addArticleToDatabase() {
 
     } else {
 
-        // Get the form element by its ID
         const form = document.getElementById('ajtArticle'); // Replace with your actual form ID
         console.log(form)
 
@@ -160,6 +159,8 @@ async function addArticleToDatabase() {
         const prix = Number(formData.get('price'));
         const quantite = Number(formData.get('quantity'));
         const marque = formData.get('brand');
+        const image = formData.get('image');
+        const type = formData.get('type');
 
         console.log(nomArticle, prix, quantite, marque);
 
@@ -173,7 +174,9 @@ async function addArticleToDatabase() {
                     nom: nomArticle,
                     quantite: quantite,
                     prix: prix,
-                    marque: marque
+                    marque: marque,
+                    type: type,
+                    image: image,
                 })
             });
 
@@ -200,20 +203,19 @@ async function logout() {
 
 
 async function acheterCommandesAPI(event) {
+    debugger
     event.preventDefault();
 
-    debugger;
     if (user.length === 0) {
         window.location.href = "http://127.0.0.1:5000";
     } else {
         const form = document.getElementById('acheterPanier');
-
         const formData = new FormData(form);
 
-    const cardType = document.getElementById('card_type').value;
-    const cardNumber = Number(document.getElementById('card_number').value);
-    const securityCode = Number(document.getElementById('security_code').value);
-    const expirationDate = document.getElementById('expiration_date').value;
+        const cardType = document.getElementById('card_type').value;
+        const cardNumber = Number(document.getElementById('card_number').value);
+        const securityCode = Number(document.getElementById('security_code').value);
+        const expirationDate = document.getElementById('expiration_date').value;
 
         try {
             const res = await fetch("/commandes", {
@@ -230,17 +232,21 @@ async function acheterCommandesAPI(event) {
                 })
             });
 
+            const messageElement = document.getElementById('message');
 
-            if (!res.ok) {
-                throw new Error("Échec de l'ajout de l'article. Vérifiez la réponse du serveur.");
+            if (res.ok) {
+                messageElement.textContent = "Paiement réussi !";
+            } else {
+                messageElement.textContent = "Erreur lors du paiement. Veuillez réessayer.";
             }
-            return await res.json();
         } catch (error) {
+            const messageElement = document.getElementById('message');
             console.error("Error:", error);
-            throw error;
+            messageElement.textContent = "Erreur lors du paiement. Veuillez réessayer.";
         }
     }
 }
+
 
 async function viderPanier() {
     try {

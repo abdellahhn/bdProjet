@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 import pymysql
@@ -137,22 +138,27 @@ def addProductToCartInDataBase(nom, quantite, email, prix):
         return False
 
 
-def addArticleToDB(quantite, nom, marque, prix, note_moyenne=None):  # Allow optional note_moyenne
+def addArticleToDB(quantite, nom, marque, prix, type, image, note_moyenne=None):
     connection = establish_connection()
     if connection:
         try:
             with connection.cursor() as cursor:
-                request = """INSERT INTO Article (quantite, type, nom_article, prix, note_moyenne, marque) 
-                             VALUES (%s, %s, %s, %s, %s, %s);"""
-                cursor.execute(request, (quantite, '{"nom"}', nom, prix, note_moyenne, marque))
-
+                request = """
+                    INSERT INTO Article (quantite, image, type, nom_article, prix, note_moyenne, marque) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """
+                cursor.execute(request, (quantite, image, type, nom, prix, note_moyenne, marque))
                 connection.commit()
                 print("Article ajouté avec succès!")
+                return True
         except pymysql.Error as err:
             print(f"Error adding article: {err}")
+            return False
         finally:
-            if connection:
-                connection.close()
+            connection.close()
+    else:
+        print("Database connection not established.")
+        return False
 
 
 def dropCartInDataBase(id_client):
@@ -169,6 +175,40 @@ def dropCartInDataBase(id_client):
         finally:
             if connection:
                 connection.close()
+
+
+def changerQuantiteArticle(id_panier):
+    connection = establish_connection()
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                # Récupérer l'id de l'article associé à l'id du panier
+                cursor.execute("SELECT id_Article, quantite FROM panier WHERE id_panier = %s", (id_panier,))
+                result = cursor.fetchone()
+                if result:
+                    article_id, quantite_panier = result
+                    # Récupérer la quantité actuelle de l'article dans la table Article
+                    cursor.execute("SELECT quantite FROM Article WHERE id_Article = %s", (article_id,))
+                    quantite_article = cursor.fetchone()[0]
+
+                    if quantite_article >= quantite_panier:
+                        # Réduire la quantité de l'article dans la table Article
+                        nouvelle_quantite = quantite_article - quantite_panier
+                        cursor.execute("UPDATE Article SET quantite = %s WHERE id_Article = %s",
+                                       (nouvelle_quantite, article_id))
+                        connection.commit()
+                        print(f"Quantité de l'article {article_id} mise à jour avec succès.")
+                        return True  # Indiquer que la mise à jour a réussi
+                    else:
+                        print("Quantité insuffisante dans le stock.")
+                else:
+                    print("Panier introuvable.")
+        except pymysql.Error as err:
+            print(f"Erreur lors de la mise à jour de la quantité de l'article: {err}")
+        finally:
+            if connection:
+                connection.close()
+    return False
 
 
 def acheterCommandesDB(email, type, numero, code, date):
@@ -192,10 +232,11 @@ def acheterCommandesDB(email, type, numero, code, date):
                     if id_paniers:
                         for id_panier in id_paniers:
                             prix_total = getPrixTotal(id_client, id_paniers)
-                            id_transaction = insert_transaction(id_client, id_panier, prix_total, date,
+                            id_transaction = insert_transaction(id_client, id_panier, prix_total,
                                                                 adresse_livraison,
                                                                 cursor, connection)
                             print(f"Transaction pour le panier {id_panier} ajoutée avec succès!")
+                            changerQuantiteArticle(id_panier)
                             articles_panier = get_articles_panier(id_client, id_panier)
                             if articles_panier:
                                 for id_article in articles_panier:
@@ -207,6 +248,7 @@ def acheterCommandesDB(email, type, numero, code, date):
                                     connection.commit()
                                 print(
                                     f"Articles achetés du panier {id_panier} ajoutés avec succès dans la table Acheter.")
+                                return True  # Indique que l'opération s'est déroulée avec succès
                             else:
                                 print(f"Aucun article trouvé dans le panier {id_panier}.")
                     else:
@@ -218,6 +260,7 @@ def acheterCommandesDB(email, type, numero, code, date):
         finally:
             if connection:
                 connection.close()
+    return False
 
 
 def getPrixTotal(id_client, id_panier):
@@ -226,28 +269,32 @@ def getPrixTotal(id_client, id_panier):
         try:
             with connection.cursor() as cursor:
                 request_prix_total = """
-                    SELECT prix_total FROM panier 
+                    SELECT id_Article, quantite FROM panier 
                     WHERE id_client = %s AND id_panier = %s
                 """
                 cursor.execute(request_prix_total, (id_client, id_panier))
-                result = cursor.fetchone()
-                if result:
-                    prix_total = result[0]
-                    return prix_total
-                else:
-                    print("Aucun prix total trouvé pour ces identifiants.")
-                    return None
+                items = cursor.fetchall()
+                prix_total = 0
+                for item in items:
+                    article_id, quantite = item
+                    cursor.execute("SELECT prix FROM Article WHERE id_Article = %s", (article_id,))
+                    prix_article = cursor.fetchone()[0]
+                    prix_total += prix_article * quantite
+                return prix_total
 
         except pymysql.Error as err:
             print(f"Erreur lors de la récupération du prix total: {err}")
-            return None
         finally:
-            connection.close()
+            if connection:
+                connection.close()
+    return None
 
 
-def insert_transaction(id_client, id_panier, prix_total, date, adresse_livraison, cursor, connection):
+def insert_transaction(id_client, id_panier, prix_total, adresse_livraison, cursor, connection):
     try:
         transaction_id = uuid.uuid4()
+        current_datetime = datetime.datetime.now()
+        print(prix_total)
 
         request_transaction = """
             INSERT INTO Transaction (id_Transaction, id_client, id_panier, prix, date_transaction, adresse_livraison)
@@ -258,7 +305,7 @@ def insert_transaction(id_client, id_panier, prix_total, date, adresse_livraison
             id_client,
             id_panier,
             prix_total,
-            date,
+            current_datetime.date(),
             adresse_livraison
         ))
         connection.commit()
@@ -437,7 +484,7 @@ def get_article_id(nom, marque):
                 cursor.execute("SELECT id_Article FROM Article WHERE Nom_Article = %s AND Marque = %s", (nom, marque))
                 result = cursor.fetchone()
                 if result:
-                    article_id = result[0]  # L'ID de l'article est le premier élément du résultat
+                    article_id = result[0]
         except pymysql.Error as err:
             print(f"Erreur lors de la récupération de l'ID de l'article: {err}")
         finally:
@@ -446,6 +493,37 @@ def get_article_id(nom, marque):
     return article_id
 
 
+def addConnectionToDB(email):
+    connection = establish_connection()
+    client_id = get_client_id(email)
+    if connection and client_id:
+        try:
+            with connection.cursor() as cursor:
+                current_datetime = datetime.datetime.now()
+                id_connexion = uuid.uuid4()
+                cursor.execute("""
+                    INSERT INTO connexion_client (id_connexion, id_client, connexion, heure_navigation)
+                    VALUES (%s, %s, %s, %s)
+                """, (id_connexion, client_id, current_datetime.date(), current_datetime.hour))
+                connection.commit()
+                return True
+
+        except pymysql.Error as err:
+            print(f"Erreur lors de l'ajout de la connexion à la base de données: {err}")
+            return False
+        finally:
+            if connection:
+                connection.close()
+    else:
+        print("Erreur lors de la connexion à la base de données ou de l'obtention de l'ID client.")
+        return False
+
+
 if __name__ == "__main__":
+    total = getPrixTotal(1, "ac4df9f6-fad9-11ee-a5a0-62be92a17154")
+    total2 = total + getPrixTotal(1, "acdfd3c6-fad9-11ee-a5a0-62be92a17154")
+
+    lol = changerQuantiteArticle("f253a1c2-fad8-11ee-a5a0-62be92a17154")
+
     avis = getAvisForUser("abdellahhanane44@gmail.com")
-    print(avis)  # Test fetching products
+    print(total2)  # Test fetching products

@@ -45,12 +45,11 @@ CREATE TABLE panier (id_panier varchar(36) primary key , id_Article char(15) ref
 SELECT * FROM panier;
 
 DROP TABLE IF EXISTS connexion_client;
-CREATE TABLE connexion_client (id_connexion char(35), id_client char(25), connexion date, heure_navigation int);
+CREATE TABLE connexion_client (id_connexion varchar(200), id_client char(25), connexion date, heure_navigation int);
 SELECT * FROM connexion_client;
 
 SHOW TABLES;
 
- -- fonction qui vérifie si l'adresse email figure dans la bd
 
 delimiter //
 CREATE FUNCTION emailExiste(le_mail varchar(50)) RETURNS integer
